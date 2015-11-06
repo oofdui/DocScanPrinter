@@ -11,8 +11,6 @@ Public Class frmAuto
     Public strSearch As String
     Public tempQueueNumber As String = ""
     Public tempQueueNumberQuery As String = ""
-    Private DateTimeFormatForSQL As String = "yyyy-MM-dd HH:mm"
-    'เดิมใช้ "yyyy-dd-MM"
 
     Public ret As Windows.Forms.DialogResult
 
@@ -241,8 +239,7 @@ Public Class frmAuto
             Else
                 strSearch &= "WHERE "
             End If
-            'strSearch &= "(CF.scannow BETWEEN '" & dtpFrom.Value.ToString("yyyy-dd-MM") & " " & dtpFromT.Value.Hour & ":" & dtpFromT.Value.Minute & "' AND '" & dtpTo.Value.ToString("yyyy-dd-MM") & " " & dtpToT.Value.Hour & ":" & dtpToT.Value.Minute & "') "
-            strSearch &= "(CF.scannow BETWEEN '" & dtpFrom.Value.ToString(DateTimeFormatForSQL) & "' AND '" & dtpTo.Value.ToString(DateTimeFormatForSQL) & "') "
+            strSearch &= "(CF.scannow BETWEEN '" & dtpFrom.Value.ToString("yyyy-dd-MM") & " " & dtpFromT.Value.Hour & ":" & dtpFromT.Value.Minute & "' AND '" & dtpTo.Value.ToString("yyyy-dd-MM") & " " & dtpToT.Value.Hour & ":" & dtpToT.Value.Minute & "') "
         ElseIf dtpFrom.Checked = True And dtpTo.Checked = False Then 'เลือกวันเริ่มต้น
             'DT >= ...
             checkSearch = True
@@ -251,8 +248,7 @@ Public Class frmAuto
             Else
                 strSearch &= "WHERE "
             End If
-            'strSearch &= "CF.scannow >= '" & dtpFrom.Value.ToString("yyyy-dd-MM") & " " & dtpFromT.Value.Hour & ":" & dtpFromT.Value.Minute & "' "
-            strSearch &= "CF.scannow >= '" & dtpFrom.Value.ToString(DateTimeFormatForSQL) & "' "
+            strSearch &= "CF.scannow >= '" & dtpFrom.Value.ToString("yyyy-dd-MM") & " " & dtpFromT.Value.Hour & ":" & dtpFromT.Value.Minute & "' "
         ElseIf dtpFrom.Checked = False And dtpTo.Checked = True Then 'เลือกวันสิ้นสุด
             'DT <= ...
             checkSearch = True
@@ -261,8 +257,7 @@ Public Class frmAuto
             Else
                 strSearch &= "WHERE "
             End If
-            'strSearch &= "CF.scannow <='" & dtpTo.Value.ToString("yyyy-dd-MM") & " " & dtpToT.Value.Hour & ":" & dtpToT.Value.Minute & "' "
-            strSearch &= "CF.scannow <='" & dtpTo.Value.ToString(DateTimeFormatForSQL) & "' "
+            strSearch &= "CF.scannow <='" & dtpTo.Value.ToString("yyyy-dd-MM") & " " & dtpToT.Value.Hour & ":" & dtpToT.Value.Minute & "' "
         End If
         If lbGroup.Items.Count > 0 Then
             Dim docGroupSplit As Array
