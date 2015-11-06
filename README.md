@@ -1,6 +1,6 @@
 # DocScanPrinter
 ### โปรแกรมปริ้นเอกสารจากระบบ DocScan อัตโนมัติตามเงื่อนไขที่กำหนด
-![alt tag](https://github.com/oofdui/DocScanPrinter/blob/master/SS.png)
+
 * v.1.5
 	* เพิ่มตัวดัก Error กรณีปริ้นใบยาแล้ว ลำดับ บนหัวเอกสารออกมาซ้ำกัน ให้เมล์แจ้งเตือนเพื่อหาสาเหตุของปัญหา
 * v.1.4
