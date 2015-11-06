@@ -587,6 +587,23 @@ Public Class frmAuto
                     Catch ex As Exception
                         'อัพเดทการปริ้น
                         'SQLExecuteMDR("INSERT INTO mdr_autoprint_log(hn,episode,itemno,usern,hostname,ipaddress,dtprint) VALUES('" & hn & "','" & episode & "'," & no & ",'" & frmLogin.txtUsern.Text.Trim & "','" & hostname & "','" & ip & "','" & Now.Year & "-" & Now.Month & "-" & Now.Day & " " & Now.Hour & ":" & Now.Minute & ":" & Now.Second & "')")
+                        'เช็คกรณี QueueNumber บนหัวใบยาซ้ำกันกับเลขที่ได้ก่อนหน้า ให้เมล์มาหา
+                        Dim mailTo As String = System.Configuration.ConfigurationManager.AppSettings("mailTo")
+                        If (mailTo = "") Then
+                            mailTo = "nithi.re@glsict.com"
+                        End If
+                        Try
+                            Dim wsDefault As New wsDefault.ServiceSoapClient
+                            wsDefault.MailSend(
+                                mailTo,
+                                "DocScanPrinter : BindPicture & Update PrintLog",
+                                ex.Message,
+                                "AutoSystem@glsict.com",
+                                System.Configuration.ConfigurationManager.AppSettings("Site") & " : " & "DocScanPrinter",
+                                "", "", "", False)
+                        Catch ex2 As Exception
+
+                        End Try
                         Return False
                     End Try
                 Else
@@ -672,9 +689,9 @@ Public Class frmAuto
         strSQL.Append("ROW_NUMBER() OVER (ORDER BY B.scannow ASC) RowNumber,A.hn,A.episode,A.itemno,B.scannow,E.prefixname PriorityName ")
 
         strSQL.Append("FROM ")
-        strSQL.Append("mdr_pharmacyremarks A WITH(NOLOCK) ")
-        strSQL.Append("INNER JOIN mdr_cardfiles B WITH(NOLOCK) ON A.hn=B.hn AND A.episode=B.episode AND A.itemno=B.itemno ")
-        strSQL.Append("INNER JOIN mdr_syspharmacypriority E WITH(NOLOCK) ON A.ordertype=E.code AND E.isactive='1' ")
+        strSQL.Append("mdr_pharmacyremarks A ")
+        strSQL.Append("INNER JOIN mdr_cardfiles B ON A.hn=B.hn AND A.episode=B.episode AND A.itemno=B.itemno ")
+        strSQL.Append("INNER JOIN mdr_syspharmacypriority E ON A.ordertype=E.code AND E.isactive='1' ")
 
         strSQL.Append("WHERE ")
         strSQL.Append("B.scannow>=CONVERT(DATE,GETDATE()) ")
