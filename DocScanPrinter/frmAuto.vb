@@ -406,6 +406,7 @@ Public Class frmAuto
         Dim clsGlobal As New clsGlobal()
         If clsGlobal.PharmacyQueueMode = "Enable" Then
             pharmacyQueueQueryWhere = " AND (SELECT COUNT(itemno) FROM mdr_pharmacyremarks WITH(NOLOCK) WHERE hn=CF.hn AND episode=CF.episode AND itemno=CF.itemno)>0 "
+            pharmacyQueueQueryWhere += "AND (SELECT COUNT(itemno) FROM mdr_autoprint_log WHERE hn=CF.hn AND episode=CF.episode AND itemno=CF.itemno)=0 "
         End If
         'ส่วนตรวจสอบว่าเป็นการวนลูปปริ้นโดยการคลิกเริ่ม หรือ ผ่านตัว Timer
         If lblTimerTick.Text = "0" Then 'ถ้าเป็นการคลิกเริ่ม จะวนลูปทั้งหมด เริ่มจากเวลาน้อยสุด
@@ -701,13 +702,18 @@ Public Class frmAuto
         result = SQLReturnMDR(strSQL.ToString())
         Try
             If (result = tempQueueNumber) Then
-                'เช็คกรณี QueueNumber บนหัวใบยาซ้ำกันกับเลขที่ได้ก่อนหน้า ให้เมล์มาหา
-                Dim mailTo As String = System.Configuration.ConfigurationManager.AppSettings("mailTo")
-                If (mailTo = "") Then
-                    mailTo = "nithi.re@glsict.com"
-                End If
-                Dim wsDefault As New wsDefault.ServiceSoapClient
-                wsDefault.MailSend(
+                'กรณีได้ QueueNumber ซ้ำ ให้หน่วงเวลา 1 วินาทีแล้วหาเลขใหม่อีกครั้ง
+                System.Threading.Thread.Sleep(1000)
+                result = SQLReturnMDR(strSQL.ToString())
+
+                If (result = tempQueueNumber) Then
+                    'เช็คกรณี QueueNumber บนหัวใบยาซ้ำกันกับเลขที่ได้ก่อนหน้า ให้เมล์มาหา
+                    Dim mailTo As String = System.Configuration.ConfigurationManager.AppSettings("mailTo")
+                    If (mailTo = "") Then
+                        mailTo = "nithi.re@glsict.com"
+                    End If
+                    Dim wsDefault As New wsDefault.ServiceSoapClient
+                    wsDefault.MailSend(
                     mailTo,
                     "DocScanPrinter : Duplicate Queue Number",
                     "Previous Query : " & tempQueueNumberQuery & "<br/>Previous Number : " & tempQueueNumber & "<hr/>" &
@@ -715,6 +721,7 @@ Public Class frmAuto
                     "AutoSystem@glsict.com",
                     System.Configuration.ConfigurationManager.AppSettings("Site") & " : " & "DocScanPrinter",
                     "", "", "", False)
+                End If
             End If
         Catch ex As Exception
 

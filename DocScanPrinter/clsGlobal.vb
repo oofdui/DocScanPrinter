@@ -1,6 +1,6 @@
 ﻿Public Class clsGlobal
     Public ApplicationName As String = "DocScanPrinter"
-    Public ApplicationVersion As String = "1.6"
+    Public ApplicationVersion As String = "1.8"
     Public Site As String = System.Configuration.ConfigurationManager.AppSettings("Site")
     Public Department As String = System.Configuration.ConfigurationManager.AppSettings("Department")
 

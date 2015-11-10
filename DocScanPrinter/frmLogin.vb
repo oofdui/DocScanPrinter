@@ -88,7 +88,7 @@ Public Class frmLogin
                     If System.Configuration.ConfigurationManager.AppSettings("UsageLogEnable").ToLower() = "true" Then
                         Dim WSCenter As New WSCenter.ServiceSoapClient
                         Dim clsGlobal As New clsGlobal()
-                        WSCenter.InsertLogApplicationBySite(clsGlobal.ApplicationName, clsGlobal.Department, clsGlobal.Site, txtUsern.Text.Trim(), ip, hostName)
+                        WSCenter.InsertLogApplicationBySite(clsGlobal.ApplicationName, clsGlobal.Department + " v." + clsGlobal.ApplicationVersion, clsGlobal.Site, txtUsern.Text.Trim(), ip, hostName)
                     End If
                 Catch ex As Exception
                     MessageBox.Show("เกิดข้อผิดพลาดขณะบันทึก Log", "Login_Click(UsageLog)", MessageBoxButtons.OK, MessageBoxIcon.Error)
