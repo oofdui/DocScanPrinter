@@ -1,5 +1,7 @@
-# DocScanPrinter
+﻿# DocScanPrinter
 ### โปรแกรมปริ้นเอกสารจากระบบ DocScan อัตโนมัติตามเงื่อนไขที่กำหนด
+
+![alt tag](https://github.com/oofdui/DocScanPrinter/blob/master/SS.png)
 
 * v.1.8
 	* เพิ่มวิธีเช็คการปริ้นลำดับใบยาซ้ำ โดยถ้าวิธีหาเลขปกติได้เลขซ้ำ จะหน่วงเวลา 1 วินาทีแล้วหาใหม่ ถ้ายังซ้ำอยู่จะเมล์เตือน
