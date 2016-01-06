@@ -19,6 +19,8 @@ Public Class frmAuto
     End Sub
 
     Private Sub frmAuto_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        'Dim test As String = CountByPriority("Stat", "1515025870", "O1516005969", "1")
+        'test = CountByPriority("Normal, Standing", "1514010742", "I1516000215", "1")
         Dim clsGlobal As New clsGlobal()
         lblHeaderDetail.Text &= " v." & clsGlobal.ApplicationVersion
 
@@ -681,54 +683,78 @@ Public Class frmAuto
         Return result
     End Function
     Private Function CountByPriority(PriorityName As String, HN As String, Episode As String, ItemNo As String)
+        System.Threading.Thread.CurrentThread.CurrentCulture = New System.Globalization.CultureInfo("en-US")
         Dim result As String = ""
-        Dim strSQL As New System.Text.StringBuilder()
+        'Dim strSQL As New System.Text.StringBuilder()
+        Dim strSQL As String
+        Dim QueueNumber As Integer = 1
+        Dim tmp As String = ""
 
-        strSQL.Append("SELECT RowNumber FROM ")
-        strSQL.Append("(")
-        strSQL.Append("SELECT ")
-        strSQL.Append("ROW_NUMBER() OVER (ORDER BY B.scannow ASC) RowNumber,A.hn,A.episode,A.itemno,B.scannow,E.prefixname PriorityName ")
-
-        strSQL.Append("FROM ")
-        strSQL.Append("mdr_pharmacyremarks A ")
-        strSQL.Append("INNER JOIN mdr_cardfiles B ON A.hn=B.hn AND A.episode=B.episode AND A.itemno=B.itemno ")
-        strSQL.Append("INNER JOIN mdr_syspharmacypriority E ON A.ordertype=E.code AND E.isactive='1' ")
-
-        strSQL.Append("WHERE ")
-        strSQL.Append("B.scannow>=CONVERT(DATE,GETDATE()) ")
-        strSQL.Append("AND E.prefixname='" & PriorityName & "' ")
-        strSQL.Append(") TB ")
-        strSQL.Append("WHERE hn='" & HN.Replace("-", "") & "' AND episode='" & Episode.Replace("-", "") & "' AND itemno=" & ItemNo & ";")
-        result = SQLReturnMDR(strSQL.ToString())
         Try
-            If (result = tempQueueNumber) Then
-                'กรณีได้ QueueNumber ซ้ำ ให้หน่วงเวลา 1 วินาทีแล้วหาเลขใหม่อีกครั้ง
-                System.Threading.Thread.Sleep(1000)
-                result = SQLReturnMDR(strSQL.ToString())
-
-                If (result = tempQueueNumber) Then
-                    'เช็คกรณี QueueNumber บนหัวใบยาซ้ำกันกับเลขที่ได้ก่อนหน้า ให้เมล์มาหา
-                    Dim mailTo As String = System.Configuration.ConfigurationManager.AppSettings("mailTo")
-                    If (mailTo = "") Then
-                        mailTo = "nithi.re@glsict.com"
-                    End If
-                    Dim wsDefault As New wsDefault.ServiceSoapClient
-                    wsDefault.MailSend(
-                    mailTo,
-                    "DocScanPrinter : Duplicate Queue Number",
-                    "Previous Query : " & tempQueueNumberQuery & "<br/>Previous Number : " & tempQueueNumber & "<hr/>" &
-                    "Current Query : " & strSQL.ToString() & "<br/>Current Number : " & result,
-                    "AutoSystem@glsict.com",
-                    System.Configuration.ConfigurationManager.AppSettings("Site") & " : " & "DocScanPrinter",
-                    "", "", "", False)
-                End If
+            Dim priority As String = PriorityName.Substring(0, 4)
+            'เช็ค Log ในฐานข้อมูลก่อนว่าวันนี้มีรึยัง
+            strSQL = "SELECT COUNT(hn) FROM mdr_autoprint_log WHERE episode='" & priority & "' AND usern='" & DateTime.Now.ToString("yyyy-MM-dd") & "';"
+            tmp = SQLReturn(strSQL)
+            If tmp <> "0" Then
+                strSQL = "SELECT itemno FROM mdr_autoprint_log WHERE episode='" & priority & "' AND usern='" & DateTime.Now.ToString("yyyy-MM-dd") & "';"
+                QueueNumber = Integer.Parse(SQLReturn(strSQL))
+                QueueNumber += 1
+                strSQL = "UPDATE mdr_autoprint_log SET itemno=" & QueueNumber & ",dtprint=GETDATE() WHERE episode='" & priority & "' AND usern='" & DateTime.Now.ToString("yyyy-MM-dd") & "';"
+                SQLExecuteMDR(strSQL)
+            Else
+                strSQL = "INSERT INTO mdr_autoprint_log(hn,episode,itemno,scannow,dtprint,usern)VALUES('QueueNums','" & priority & "'," & QueueNumber & ",CONVERT(DATE, GETDATE())  ,GETDATE(),'" & DateTime.Now.ToString("yyyy-MM-dd") & "');"
+                SQLExecuteMDR(strSQL)
             End If
-        Catch ex As Exception
+            result = QueueNumber
+
+            'strSQL.Append("SELECT RowNumber FROM ")
+            'strSQL.Append("(")
+            'strSQL.Append("SELECT ")
+            'strSQL.Append("ROW_NUMBER() OVER (ORDER BY B.scannow ASC) RowNumber,A.hn,A.episode,A.itemno,B.scannow,E.prefixname PriorityName ")
+
+            'strSQL.Append("FROM ")
+            'strSQL.Append("mdr_pharmacyremarks A ")
+            'strSQL.Append("INNER JOIN mdr_cardfiles B ON A.hn=B.hn AND A.episode=B.episode AND A.itemno=B.itemno ")
+            'strSQL.Append("INNER JOIN mdr_syspharmacypriority E ON A.ordertype=E.code AND E.isactive='1' ")
+
+            'strSQL.Append("WHERE ")
+            'strSQL.Append("B.scannow>=CONVERT(DATE,GETDATE()) ")
+            'strSQL.Append("AND E.prefixname='" & PriorityName & "' ")
+            'strSQL.Append(") TB ")
+            'strSQL.Append("WHERE hn='" & HN.Replace("-", "") & "' AND episode='" & Episode.Replace("-", "") & "' AND itemno=" & ItemNo & ";")
+            'result = SQLReturnMDR(strSQL.ToString())
+
+            'Try
+            '    If (result = tempQueueNumber) Then
+            '        'กรณีได้ QueueNumber ซ้ำ ให้หน่วงเวลา 1 วินาทีแล้วหาเลขใหม่อีกครั้ง
+            '        System.Threading.Thread.Sleep(1000)
+            '        result = SQLReturnMDR(strSQL.ToString())
+
+            '        If (result = tempQueueNumber) Then
+            '            'เช็คกรณี QueueNumber บนหัวใบยาซ้ำกันกับเลขที่ได้ก่อนหน้า ให้เมล์มาหา
+            '            Dim mailTo As String = System.Configuration.ConfigurationManager.AppSettings("mailTo")
+            '            If (mailTo = "") Then
+            '                mailTo = "nithi.re@glsict.com"
+            '            End If
+            '            Dim wsDefault As New wsDefault.ServiceSoapClient
+            '            wsDefault.MailSend(
+            '            mailTo,
+            '            "DocScanPrinter : Duplicate Queue Number",
+            '            "Previous Query : " & tempQueueNumberQuery & "<br/>Previous Number : " & tempQueueNumber & "<hr/>" &
+            '            "Current Query : " & strSQL.ToString() & "<br/>Current Number : " & result,
+            '            "AutoSystem@glsict.com",
+            '            System.Configuration.ConfigurationManager.AppSettings("Site") & " : " & "DocScanPrinter",
+            '            "", "", "", False)
+            '        End If
+            '    End If
+            'Catch ex As Exception
+
+            'End Try
+            'tempQueueNumber = result
+            'tempQueueNumberQuery = strSQL.ToString()
+        Catch exMain As Exception
 
         End Try
-        tempQueueNumber = result
-        tempQueueNumberQuery = strSQL.ToString()
-
         Return result
     End Function
     Private Sub btGroupAdd_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btGroupAdd.Click

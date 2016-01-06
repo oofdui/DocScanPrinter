@@ -4,7 +4,7 @@
   <description asmv2:iconFile="DocScanPrinter_Icon.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="DocScanPrinter" version="1.8.0.0" language="neutral" processorArchitecture="msil" />
+    <assemblyIdentity name="DocScanPrinter" version="1.9.0.0" language="neutral" processorArchitecture="msil" />
     <commandLine file="DocScanPrinter.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -57,14 +57,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DocScanPrinter.exe" size="878080">
-      <assemblyIdentity name="DocScanPrinter" version="1.8.0.0" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="DocScanPrinter.exe" size="869376">
+      <assemblyIdentity name="DocScanPrinter" version="1.9.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>PtutLcQMzoweVBTG4vAg0ssnWxg=</dsig:DigestValue>
+        <dsig:DigestValue>UQXr79DYpTWGz1nR3DyT9haMLkg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
